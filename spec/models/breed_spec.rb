@@ -59,4 +59,26 @@ RSpec.describe Breed, type: :model do
       end
     end
   end
+
+  describe '#destroy_orphan_tags' do
+    let!(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 1) }
+    let(:tag) { breed.tags.first }
+
+    context 'no other breeds with this tag' do
+      it 'destroys the tag' do
+        expect { breed.destroy_orphan_tags }.to change { Tag.count }.from(1).to(0)
+      end
+    end
+
+    context 'another breed has this tag' do
+      let!(:breed_2) { FactoryGirl.create(:breed) }
+      let!(:breed_tag_record) do
+        FactoryGirl.create(:breed_tag_record, breed: breed_2, tag: tag)
+      end
+
+      it 'does not destroy the tag' do
+        expect { breed.destroy_orphan_tags }.not_to change { Tag.count }.from(1)
+      end
+    end
+  end
 end

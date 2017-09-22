@@ -119,9 +119,11 @@ RSpec.describe BreedsController, type: :controller do
   describe "DELETE #destroy" do
     let!(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 1) }
 
-    it "destroys the requested breed" do
+    it "destroys the requested breed and calls destroy_orphan_tags" do
       expect(Breed.count).to eq 1
       expect(BreedTagRecord.count).to eq 1
+      expect_any_instance_of(Breed).to receive(:destroy_orphan_tags)
+
       delete :destroy, params: {id: breed.to_param}
       expect(Breed.count).to eq 0
       expect(BreedTagRecord.count).to eq 0
