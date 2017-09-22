@@ -18,9 +18,9 @@ class BreedsController < ApplicationController
     @breed = Breed.new(breed_params)
 
     if @breed.save
-      render json: @breed, status: :created, location: @breed
+      render json: @breed, status: 201, location: @breed
     else
-      render json: @breed.errors, status: :unprocessable_entity
+      render json: { errors: @breed.errors }, status: 422
     end
   end
 
@@ -29,13 +29,14 @@ class BreedsController < ApplicationController
     if @breed.update(breed_params)
       render json: @breed
     else
-      render json: @breed.errors, status: :unprocessable_entity
+      render json: { errors: @breed.errors }, status: 422
     end
   end
 
   # DELETE /breeds/1
   def destroy
     @breed.destroy
+    head 204
   end
 
   private
