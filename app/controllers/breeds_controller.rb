@@ -15,7 +15,8 @@ class BreedsController < ApplicationController
 
   # POST /breeds
   def create
-    @breed = Breed.new(breed_params)
+    @breed = Breed.new(name: breed_params[:name])
+    @breed.set_tags(breed_params[:tags])
 
     if @breed.save
       render json: @breed, status: 201, location: @breed
@@ -26,7 +27,7 @@ class BreedsController < ApplicationController
 
   # PATCH/PUT /breeds/1
   def update
-    if @breed.update(breed_params)
+    if @breed.update(name: breed_params[:name]) && @breed.set_tags(breed_params[:tags])
       render json: @breed
     else
       render json: { errors: @breed.errors }, status: 422
@@ -47,6 +48,6 @@ class BreedsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def breed_params
-      params.require(:breed).permit(:name)
+      params.require(:breed).permit(:name, tags: [])
     end
 end

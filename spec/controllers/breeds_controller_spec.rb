@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe BreedsController, type: :controller do
-  let(:valid_attributes) { FactoryGirl.attributes_for(:breed) }
+  let(:valid_attributes) { { name: FFaker::Name.name, tags: [FFaker::Music.artist, FFaker::Music.artist] } }
 
   describe "GET #index" do
     before do
@@ -18,29 +18,57 @@ RSpec.describe BreedsController, type: :controller do
   end
 
   describe "GET #show" do
-    let(:breed) { FactoryGirl.create(:breed) }
+    let(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 2) }
 
-    it "returns a breed" do
+    it "returns a breed and its tags" do
       get :show, params: { id: breed.id }
       json_response = JSON.parse(response.body, symbolize_names: true)[:breed]
       expect(json_response[:name]).to eq breed.name
+      expect(json_response[:tags].count).to eq 2
+      expect(json_response[:tags].map { |tag| tag[:name] }).to match_array Tag.pluck(:name)
       expect(response.status).to eq 200
     end
   end
 
   describe "POST #create" do
     context "with valid params" do
-      it "creates a new Breed" do
-        expect {
-          post :create, params: {breed: valid_attributes}
-        }.to change(Breed, :count).by(1)
+      it "creates a new Breed, new Tags, and new BreedTagRecords" do
+        expect(Breed.count).to eq 0
+        expect(Tag.count).to eq 0
+        expect(BreedTagRecord.count).to eq 0
+
+        post :create, params: {breed: valid_attributes}
+
+        expect(Breed.count).to eq 1
+        expect(Tag.count).to eq 2
+        expect(BreedTagRecord.count).to eq 2
       end
 
       it "renders a JSON response with the new breed" do
         post :create, params: {breed: valid_attributes}
         json_response = JSON.parse(response.body, symbolize_names: true)[:breed]
         expect(json_response[:name]).to eq valid_attributes[:name]
+        expect(json_response[:tags].count).to eq 2
         expect(response.status).to eq 201
+      end
+
+      context 'when one of the tags already exists' do
+        let!(:tag) { FactoryGirl.create(:tag) }
+        let(:valid_attributes) { { name: FFaker::Name.name, tags: [FFaker::Music.artist, tag.name] } }
+
+        it 'only creates one new tag, and a new BreedTagRecord linking to it' do
+          expect(Breed.count).to eq 0
+          expect(Tag.count).to eq 1
+          expect(BreedTagRecord.count).to eq 0
+
+          post :create, params: {breed: valid_attributes}
+
+          expect(Breed.count).to eq 1
+          expect(Tag.count).to eq 2
+          expect(BreedTagRecord.count).to eq 2
+
+          expect(BreedTagRecord.find_by(tag: tag)).to be_present
+        end
       end
     end
 
@@ -89,12 +117,14 @@ RSpec.describe BreedsController, type: :controller do
   end
 
   describe "DELETE #destroy" do
-    let!(:breed) { FactoryGirl.create(:breed) }
+    let!(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 1) }
 
     it "destroys the requested breed" do
       expect(Breed.count).to eq 1
+      expect(BreedTagRecord.count).to eq 1
       delete :destroy, params: {id: breed.to_param}
       expect(Breed.count).to eq 0
+      expect(BreedTagRecord.count).to eq 0
       expect(response.status).to eq 204
     end
   end
