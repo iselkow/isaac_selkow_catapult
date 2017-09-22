@@ -15,11 +15,11 @@ class Breed < ApplicationRecord
   end
 
   def destroy_orphan_tags
-    tag_ids = tags.map(&:id)
+    tag_ids = tags.pluck(:id)
     orphan_tag_ids = BreedTagRecord.where(tag_id: tag_ids).
                                     group(:tag_id).
                                     having('count(id) = 1').
                                     pluck(:tag_id)
-    Tag.where(id: orphan_tag_ids).destroy_all
+    Tag.where(id: orphan_tag_ids).delete_all
   end
 end
