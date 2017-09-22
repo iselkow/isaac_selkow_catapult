@@ -10,7 +10,7 @@ rather than just the tag's name. I felt that this would be more useful for a use
 data.
 
 2. In order to speed up the stats pages I implemented a cache_counter on the BreedTagRecord table. This should prevent us
-from having to query the database for a count on each individual table.
+from having to query the database for a count on each individual breed or tag.
 
 3. I hope that the SQL used in the destroy_orphan_tags is sufficiently performant. It allows us to get all of the offending id's
 in just 3 queries. The third query uses a delete_all rather than a destroy_all which wraps each delete in an ActiveRecord transaction.
