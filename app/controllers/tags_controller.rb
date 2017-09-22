@@ -27,6 +27,13 @@ class TagsController < ApplicationController
     @tag.destroy
   end
 
+  # GET /tags/stats
+  def stats
+    @tags = Tag.all
+
+    render json: @tags, each_serializer: TagStatsSerializer
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_tag

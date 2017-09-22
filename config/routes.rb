@@ -8,5 +8,7 @@ Rails.application.routes.draw do
     get 'stats', on: :collection
   end
 
-  resources :tags, except: [:create]
+  resources :tags, except: [:create] do
+    get 'stats', on: :collection
+  end
 end
