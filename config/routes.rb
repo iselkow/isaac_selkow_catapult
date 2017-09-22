@@ -4,6 +4,8 @@ Rails.application.routes.draw do
       get 'tags' => 'breeds#get_tags'
       post 'tags' => 'breeds#post_tags'
     end
+
+    get 'stats', on: :collection
   end
 
   resources :tags, except: [:create]

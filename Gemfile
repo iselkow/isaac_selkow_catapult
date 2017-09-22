@@ -12,7 +12,8 @@ gem 'rails', '~> 5.1.4'
 gem 'sqlite3'
 # Use Puma as the app server
 gem 'puma', '~> 3.7'
-gem 'active_model_serializers'
+# gem 'active_model_serializers'
+gem 'active_model_serializers', '~> 0.8.0'
 
 group :development, :test do
   gem 'pry-rails'

@@ -154,4 +154,23 @@ RSpec.describe BreedsController, type: :controller do
       expect(response.status).to eq 201
     end
   end
+
+  describe "GET #stats" do
+    before do
+      2.times { FactoryGirl.create(:breed, :with_tag, tag_count: 3) }
+    end
+
+    it 'returns the stats of all breeds and a list of their tag_ids' do
+      get :stats
+      json_response = JSON.parse(response.body, symbolize_names: true)[:breeds]
+      expect(json_response.size).to eq 2
+
+      first_response = json_response.first
+      breed = Breed.first
+      expect(first_response[:id]).to eq breed.id
+      expect(first_response[:name]).to eq breed.name
+      expect(first_response[:tag_count]).to eq 3
+      expect(first_response[:tag_ids]).to eq breed.tags.pluck(:id)
+    end
+  end
 end

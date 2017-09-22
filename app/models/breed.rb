@@ -22,4 +22,8 @@ class Breed < ApplicationRecord
                                     pluck(:tag_id)
     Tag.where(id: orphan_tag_ids).destroy_all
   end
+
+  def tag_count
+    breed_tag_records.count
+  end
 end
