@@ -128,4 +128,28 @@ RSpec.describe BreedsController, type: :controller do
       expect(response.status).to eq 204
     end
   end
+
+  describe "GET #tags" do
+    let!(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 2) }
+
+    it 'returns the breed\'s tags' do
+      get :get_tags, params: {id: breed.id}
+      json_response = JSON.parse(response.body, symbolize_names: true)[:tags]
+      expect(json_response.size).to eq 2
+      expect(json_response.map { |tag| tag[:name] }).to match_array Tag.pluck(:name)
+      expect(response.status).to eq 200
+    end
+  end
+
+  describe "POST #tags" do
+    let!(:breed) { FactoryGirl.create(:breed, :with_tag, tag_count: 2) }
+
+    it 'returns the breed\'s tags' do
+      post :post_tags, params: {id: breed.id, breed: { tags: ['Happy'] } }
+      json_response = JSON.parse(response.body, symbolize_names: true)[:tags]
+      expect(json_response.size).to eq 1
+      expect(json_response.map { |tag| tag[:name] }).to match_array ['Happy']
+      expect(response.status).to eq 201
+    end
+  end
 end

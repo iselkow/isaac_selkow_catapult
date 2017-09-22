@@ -1,5 +1,5 @@
 class BreedsController < ApplicationController
-  before_action :set_breed, only: [:show, :update, :destroy]
+  before_action :set_breed, only: [:show, :update, :destroy, :get_tags, :post_tags]
 
   # GET /breeds
   def index
@@ -27,7 +27,7 @@ class BreedsController < ApplicationController
 
   # PATCH/PUT /breeds/1
   def update
-    if @breed.update(name: breed_params[:name]) && @breed.set_tags(breed_params[:tags])
+    if @breed.set_tags(breed_params[:tags]) && @breed.update(name: breed_params[:name])
       render json: @breed
     else
       render json: { errors: @breed.errors }, status: 422
@@ -38,6 +38,20 @@ class BreedsController < ApplicationController
   def destroy
     @breed.destroy
     head 204
+  end
+
+  # GET /breeds/1/tags
+  def get_tags
+    render json: { tags: @breed.tags }
+  end
+
+  # POST /breeds/1/tags
+  def post_tags
+    if @breed.set_tags(breed_params[:tags]) && @breed.save
+      render json: { tags: @breed.tags }, status: 201
+    else
+      render json: { errors: @breed.errors }, status: 422
+    end
   end
 
   private
